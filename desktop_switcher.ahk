@@ -131,6 +131,57 @@ _switchDesktopToTarget(targetDesktop)
     focusTheForemostWindow(targetDesktop)
 }
 
+_getJetBrainsProjectName(hwnd) {
+    WinGetTitle, windowTitle, % "ahk_id " hwnd
+    OutputDebug, % windowTitle
+    ; Main Window
+    results := StrSplit(windowTitle, " – ")
+    if (results.MaxIndex() > 1) {
+        return results[1]
+    }
+
+    ; Tool Windows
+    results := StrSplit(windowTitle, " - ")
+    if (results.MaxIndex() > 1) {
+        return results[2]
+    }
+    Throw, % "Error - No Project Name"
+}
+
+_searchSiblingWindows(hwnd, searchTitle) {
+    WinGet, pid, PID, % "ahk_id " hwnd
+    WinGet, hwndArray, List, % searchTitle " ahk_pid " pid
+    Windows := []
+    Loop, %hwndArray% {
+        Current := hwndArray%A_Index%
+        WinGetTitle, Title, % "ahk_id " Current
+        OutputDebug, % "Related Window: " Title`
+        Windows.Push(Current)
+    }
+    return Windows
+}
+
+_isJetBrains(hwnd) {
+    WinGet, activePath, ProcessPath, % "ahk_id " hwnd
+    return InStr(activePath, "JetBrains")
+}
+
+_isChromium(hwnd) {
+    WinGet, activePath, ProcessPath, % "ahk_id " hwnd
+    return InStr(activePath, ".local-chromium")
+}
+
+_getRelatedWindows(hwnd) {
+    if (_isJetBrains(hwnd)) {
+        return _searchSiblingWindows(hwnd, _getJetBrainsProjectName(hwnd))
+    }
+    else if (_isChromium(hwnd)) {
+        return _searchSiblingWindows(hwnd, "ahk_exe i)^.*.local-chromium.*$")
+    }
+    return [hwnd]
+
+}
+
 updateGlobalVariables()
 {
     ; Re-generate the list of desktops and where we fit in that. We do this because
@@ -194,10 +245,20 @@ getForemostWindowIdOnDesktop(n)
     }
 }
 
+_moveWindowToDesktop(hwnd, desktopNumber) {
+    DllCall(MoveWindowToDesktopNumberProc, UInt, hwnd, UInt, desktopNumber - 1)
+}
+
+_moveWindowAndRelatedToDesktop(hwnd, desktopNumber) {
+    for key, curHwnd in _getRelatedWindows(hwnd) {
+        _moveWindowToDesktop(curHwnd, desktopNumber)
+    }
+}
+
+
 MoveCurrentWindowToDesktop(desktopNumber) {
     WinGet, activeHwnd, ID, A
-    DllCall(MoveWindowToDesktopNumberProc, UInt, activeHwnd, UInt, desktopNumber - 1)
-    switchDesktopByNumber(desktopNumber)
+    _moveWindowToDesktop(activeHwnd, desktopNumber)
 }
 
 MoveCurrentWindowToRightDesktop()
