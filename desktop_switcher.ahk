@@ -1,8 +1,4 @@
-#SingleInstance Force ; The script will Reload if launched while already running
-#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases
-#KeyHistory 0 ; Ensures user privacy when debugging is not needed
-SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory
-SendMode Input  ; Recommended for new scripts due to its superior speed and reliability
+﻿
 
 ; Globals
 DesktopCount := 2        ; Windows starts with 2 desktops at boot
@@ -19,8 +15,7 @@ SetKeyDelay, 75
 mapDesktopsFromRegistry()
 OutputDebug, [loading] desktops: %DesktopCount% current: %CurrentDesktop%
 
-#Include %A_ScriptDir%\user_config.ahk
-return
+
 
 ;
 ; This function examines the registry to build an accurate list of the current virtual desktops and which one we're currently on.
@@ -256,27 +251,36 @@ _moveWindowAndRelatedToDesktop(hwnd, desktopNumber) {
 }
 
 
-MoveCurrentWindowToDesktop(desktopNumber) {
+MoveCurrentWindowToDesktop(desktopNumber, follow) {
     WinGet, activeHwnd, ID, A
-    _moveWindowToDesktop(activeHwnd, desktopNumber)
+    _moveWindowAndRelatedToDesktop(activeHwnd, desktopNumber)
+    if (follow) {
+        switchDesktopByNumber(desktopNumber)
+    }
 }
 
-MoveCurrentWindowToRightDesktop()
+MoveCurrentWindowToRightDesktop(follow)
 {
     global CurrentDesktop, DesktopCount
     updateGlobalVariables()
     WinGet, activeHwnd, ID, A
-    DllCall(MoveWindowToDesktopNumberProc, UInt, activeHwnd, UInt, (CurrentDesktop == DesktopCount ? 1 : CurrentDesktop + 1) - 1)
-    _switchDesktopToTarget(CurrentDesktop == DesktopCount ? 1 : CurrentDesktop + 1)
+    targetDesktop := CurrentDesktop == DesktopCount ? 1 : CurrentDesktop + 1
+    DllCall(MoveWindowToDesktopNumberProc, UInt, activeHwnd, UInt, targetDesktop - 1)
+    if (follow) {
+        _switchDesktopToTarget(targetDesktop)
+    }
 }
 
-MoveCurrentWindowToLeftDesktop()
+MoveCurrentWindowToLeftDesktop(follow)
 {
     global CurrentDesktop, DesktopCount
     updateGlobalVariables()
     WinGet, activeHwnd, ID, A
-    DllCall(MoveWindowToDesktopNumberProc, UInt, activeHwnd, UInt, (CurrentDesktop == 1 ? DesktopCount : CurrentDesktop - 1) - 1)
-    _switchDesktopToTarget(CurrentDesktop == 1 ? DesktopCount : CurrentDesktop - 1)
+    targetDesktop := CurrentDesktop == 1 ? DesktopCount : CurrentDesktop - 1
+    DllCall(MoveWindowToDesktopNumberProc, UInt, activeHwnd, UInt, targetDesktop - 1)
+    if (follow) {
+        _switchDesktopToTarget(targetDesktop)
+    }
 }
 
 ;
