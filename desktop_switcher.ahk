@@ -1,5 +1,5 @@
 ﻿
-
+SetTitleMatchMode, 2
 ; Globals
 DesktopCount := 2        ; Windows starts with 2 desktops at boot
 CurrentDesktop := 1      ; Desktop count is 1-indexed (Microsoft numbers them this way)
@@ -153,6 +153,7 @@ _searchSiblingWindows(hwnd, searchTitle) {
         OutputDebug, % "Related Window: " Title`
         Windows.Push(Current)
     }
+    OutputDebug, % "Found " Windows.MaxIndex() " Windows"
     return Windows
 }
 
