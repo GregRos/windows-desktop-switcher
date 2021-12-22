@@ -8,7 +8,7 @@
             "type": "ahk",
             "request": "launch",
             "name": "AutoHotkey Debugger",
-            "program": "${workspaceFolder}/hotkeys.ahk",
+            "program": "${workspaceFolder}/windows-desktop-switcher.ahk",
             "stopOnEntry": true
         }
     ]

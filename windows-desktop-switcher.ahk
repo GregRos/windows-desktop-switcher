@@ -17,7 +17,6 @@ GetHotkeyMode() {
         return "C"
     }
 }
-SetKeyDelay, 200
     
 CapsLock Up::Return
 CapsLock::Return

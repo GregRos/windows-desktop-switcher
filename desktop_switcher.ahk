@@ -1,4 +1,4 @@
-﻿SetTitleMatchMode, 2
+﻿SetTitleMatchMode, RegEx
 ; Globals
 DesktopCount := 2 ; Windows starts with 2 desktops at boot
 CurrentDesktop := 1 ; Desktop count is 1-indexed (Microsoft numbers them this way)
@@ -126,25 +126,30 @@ _getJetBrainsProjectName(hwnd) {
     ; Main Window
     results := StrSplit(windowTitle, " – ")
     if (results.MaxIndex() > 1) {
-        return results[1]
+        project := results[1]
     }
 
     ; Tool Windows
     results := StrSplit(windowTitle, " - ")
     if (results.MaxIndex() > 1) {
-        return results[2]
+        project := results[2]
     }
-    Throw, % "Error - No Project Name"
+    if (!project) {
+        Throw, % "Error - No Project Name"
+    }
+    regex = i).*( - \Q%project%\E|\Q%project%\E – ).*
+    return regex
 }
 
 _getSmartGitProjectName(hwnd) {
     WinGetTitle, windowTitle, % "ahk_id " hwnd
-    return windowTitle
+    return "\Q" windowTitle "\E"
 }
 
 _searchSiblingWindows(hwnd, searchTitle) {
     WinGet, pid, PID, % "ahk_id " hwnd
-    WinGet, hwndArray, List, % searchTitle " ahk_pid " pid
+    search := searchTitle " ahk_pid " pid
+    WinGet, hwndArray, List, % search
     Windows := []
     Loop, %hwndArray% {
         Current := hwndArray%A_Index%
