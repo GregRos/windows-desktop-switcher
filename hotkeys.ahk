@@ -1,28 +1,57 @@
-#SingleInstance Force ; The script will Reload if launched while already running
-#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases
+﻿#SingleInstance Force ; The script will Reload if launched while already running
+#NoEnv ; Recommended for performance and compatibility with future AutoHotkey releases
 #KeyHistory 0 ; Ensures user privacy when debugging is not needed
-SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory
-SendMode Input  ; Recommended for new scripts due to its superior speed and reliability
+SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory
+SendMode Input ; Recommended for new scripts due to its superior speed and reliability
 #Include desktop_switcher.ahk
 
-*CapsLock::Return
-#if !GetKeyState("LButton", "P")
-CapsLock & 1::switchDesktopByNumber(1)
-CapsLock & 2::switchDesktopByNumber(2)
-CapsLock & 3::switchDesktopByNumber(3)
-CapsLock & 4::switchDesktopByNumber(4)
-CapsLock & 5::switchDesktopByNumber(5)
+GetHotkeyMode() {
+    if (!GetKeyState("CapsLock", "P")) {
+        return ""
+    }
+    if (GetKeyState("RButton", "P")) {
+        return "CR"
+    } else if (GetKeyState("LButton", "P")) {
+        return "CL"
+    } else {
+        return "C"
+    }
+}
+SetKeyDelay, 200
+    
+CapsLock Up::Return
+CapsLock::Return
+Return
 
-CapsLock & d::switchDesktopToRight()
-CapsLock & a::switchDesktopToLeft()
-CapsLock & tab::switchDesktopToLastOpened()
+#if GetHotkeyMode() != ""
+RButton::Return
+LButton::Return
 #if
-#if GetKeyState("LButton", "P")
-CapsLock & d::MoveCurrentWindowToRightDesktop(True)
-CapsLock & a::MoveCurrentWindowToLeftDesktop(True)
-CapsLock & 1::MoveCurrentWindowToDesktop(1, True)
-CapsLock & 2::MoveCurrentWindowToDesktop(2, True)
-CapsLock & 3::MoveCurrentWindowToDesktop(3, True)
-CapsLock & 4::MoveCurrentWindowToDesktop(4, True)
-CapsLock & 5::MoveCurrentWindowToDesktop(5, True)
+    #if GetHotkeyMode() = "C"
+    1::switchDesktopByNumber(1)
+2::switchDesktopByNumber(2)
+3::switchDesktopByNumber(3)
+4::switchDesktopByNumber(4)
+5::switchDesktopByNumber(5)
+d::switchDesktopToRight()
+a::switchDesktopToLeft()
+tab::switchDesktopToLastOpened()
+#if
+    #if GetHotkeyMode() = "CL"
+    d::MoveCurrentWindowToRightDesktop(True)
+a::MoveCurrentWindowToLeftDesktop(True)
+1::MoveCurrentWindowToDesktop(1, True)
+2::MoveCurrentWindowToDesktop(2, True)
+3::MoveCurrentWindowToDesktop(3, True)
+4::MoveCurrentWindowToDesktop(4, True)
+5::MoveCurrentWindowToDesktop(5, True)
+#if
+    #if GetHotkeyMode() = "CR"
+    d::MoveCurrentWindowToRightDesktop(False)
+a::MoveCurrentWindowToLeftDesktop(False)
+1::MoveCurrentWindowToDesktop(1, False)
+2::MoveCurrentWindowToDesktop(2, False)
+3::MoveCurrentWindowToDesktop(3, False)
+4::MoveCurrentWindowToDesktop(4, False)
+5::MoveCurrentWindowToDesktop(5, False)
 #if

@@ -1,8 +1,7 @@
-﻿
-SetTitleMatchMode, 2
+﻿SetTitleMatchMode, 2
 ; Globals
-DesktopCount := 2        ; Windows starts with 2 desktops at boot
-CurrentDesktop := 1      ; Desktop count is 1-indexed (Microsoft numbers them this way)
+DesktopCount := 2 ; Windows starts with 2 desktops at boot
+CurrentDesktop := 1 ; Desktop count is 1-indexed (Microsoft numbers them this way)
 LastOpenedDesktop := 1
 
 ; DLL
@@ -14,8 +13,6 @@ global MoveWindowToDesktopNumberProc := DllCall("GetProcAddress", Ptr, hVirtualD
 SetKeyDelay, 75
 mapDesktopsFromRegistry()
 OutputDebug, [loading] desktops: %DesktopCount% current: %CurrentDesktop%
-
-
 
 ;
 ; This function examines the registry to build an accurate list of the current virtual desktops and which one we're currently on.
@@ -35,7 +32,7 @@ mapDesktopsFromRegistry()
         if ErrorLevel {
             RegRead, CurrentDesktopId, HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\SessionInfo\%SessionId%\VirtualDesktops, CurrentVirtualDesktop
         }
-        
+
         if (CurrentDesktopId) {
             IdLength := StrLen(CurrentDesktopId)
         }
@@ -73,8 +70,7 @@ mapDesktopsFromRegistry()
 ;
 ; This functions finds out ID of current session.
 ;
-getSessionId()
-{
+getSessionId() {
     ProcessId := DllCall("GetCurrentProcessId", "UInt")
     if ErrorLevel {
         OutputDebug, Error getting current process id: %ErrorLevel%
@@ -91,8 +87,7 @@ getSessionId()
     return SessionId
 }
 
-_switchDesktopToTarget(targetDesktop)
-{
+_switchDesktopToTarget(targetDesktop) {
     ; Globals variables should have been updated via updateGlobalVariables() prior to entering this function
     global CurrentDesktop, DesktopCount, LastOpenedDesktop
 
@@ -128,7 +123,6 @@ _switchDesktopToTarget(targetDesktop)
 
 _getJetBrainsProjectName(hwnd) {
     WinGetTitle, windowTitle, % "ahk_id " hwnd
-    OutputDebug, % windowTitle
     ; Main Window
     results := StrSplit(windowTitle, " – ")
     if (results.MaxIndex() > 1) {
@@ -141,6 +135,11 @@ _getJetBrainsProjectName(hwnd) {
         return results[2]
     }
     Throw, % "Error - No Project Name"
+}
+
+_getSmartGitProjectName(hwnd) {
+    WinGetTitle, windowTitle, % "ahk_id " hwnd
+    return windowTitle
 }
 
 _searchSiblingWindows(hwnd, searchTitle) {
@@ -167,6 +166,11 @@ _isChromium(hwnd) {
     return InStr(activePath, ".local-chromium")
 }
 
+_isSmartGit(hwnd) {
+    WinGet, activePath, ProcessPath, % "ahk_id" hwnd
+    return InStr(activePath, "smartgit.exe")
+}
+
 _getRelatedWindows(hwnd) {
     if (_isJetBrains(hwnd)) {
         return _searchSiblingWindows(hwnd, _getJetBrainsProjectName(hwnd))
@@ -174,43 +178,41 @@ _getRelatedWindows(hwnd) {
     else if (_isChromium(hwnd)) {
         return _searchSiblingWindows(hwnd, "ahk_exe i)^.*.local-chromium.*$")
     }
+    else if (_isSmartGit(hwnd)) {
+        return _searchSiblingWindows(hwnd, _getSmartGitProjectName(hwnd))
+    }
     return [hwnd]
 
 }
 
-updateGlobalVariables()
-{
+updateGlobalVariables() {
     ; Re-generate the list of desktops and where we fit in that. We do this because
     ; the user may have switched desktops via some other means than the script.
     mapDesktopsFromRegistry()
 }
 
-switchDesktopByNumber(targetDesktop)
-{
+switchDesktopByNumber(targetDesktop) {
     global CurrentDesktop, DesktopCount
     updateGlobalVariables()
     _switchDesktopToTarget(targetDesktop)
 }
 
-switchDesktopToLastOpened()
-{
+switchDesktopToLastOpened() {
     global CurrentDesktop, DesktopCount, LastOpenedDesktop
     updateGlobalVariables()
     _switchDesktopToTarget(LastOpenedDesktop)
 }
 
-switchDesktopToRight()
-{
+switchDesktopToRight() {
     global CurrentDesktop, DesktopCount
     updateGlobalVariables()
-    _switchDesktopToTarget(CurrentDesktop == DesktopCount ? 1 : CurrentDesktop + 1)
+    _switchDesktopToTarget(CurrentDesktop + 1)
 }
 
-switchDesktopToLeft()
-{
+switchDesktopToLeft() {
     global CurrentDesktop, DesktopCount
     updateGlobalVariables()
-    _switchDesktopToTarget(CurrentDesktop == 1 ? DesktopCount : CurrentDesktop - 1)
+    _switchDesktopToTarget(CurrentDesktop - 1)
 }
 
 focusTheForemostWindow(targetDesktop) {
@@ -225,8 +227,7 @@ isWindowNonMinimized(windowId) {
     return MMX != -1
 }
 
-getForemostWindowIdOnDesktop(n)
-{
+getForemostWindowIdOnDesktop(n) {
     n := n - 1 ; Desktops start at 0, while in script it's 1
 
     ; winIDList contains a list of windows IDs ordered from the top to the bottom for each desktop.
@@ -251,7 +252,6 @@ _moveWindowAndRelatedToDesktop(hwnd, desktopNumber) {
     }
 }
 
-
 MoveCurrentWindowToDesktop(desktopNumber, follow) {
     WinGet, activeHwnd, ID, A
     _moveWindowAndRelatedToDesktop(activeHwnd, desktopNumber)
@@ -260,22 +260,26 @@ MoveCurrentWindowToDesktop(desktopNumber, follow) {
     }
 }
 
-MoveCurrentWindowToRightDesktop(follow)
-{
+MoveCurrentWindowToRightDesktop(follow) {
     global CurrentDesktop, DesktopCount
     updateGlobalVariables()
+    if (CurrentDesktop >= DesktopCount) {
+        return
+    }
     WinGet, activeHwnd, ID, A
-    targetDesktop := CurrentDesktop == DesktopCount ? 1 : CurrentDesktop + 1
+    targetDesktop := CurrentDesktop + 1
     DllCall(MoveWindowToDesktopNumberProc, UInt, activeHwnd, UInt, targetDesktop - 1)
     if (follow) {
         _switchDesktopToTarget(targetDesktop)
     }
 }
 
-MoveCurrentWindowToLeftDesktop(follow)
-{
+MoveCurrentWindowToLeftDesktop(follow) {
     global CurrentDesktop, DesktopCount
     updateGlobalVariables()
+    if (CurrentDesktop == 1) {
+        return
+    }
     WinGet, activeHwnd, ID, A
     targetDesktop := CurrentDesktop == 1 ? DesktopCount : CurrentDesktop - 1
     DllCall(MoveWindowToDesktopNumberProc, UInt, activeHwnd, UInt, targetDesktop - 1)
@@ -287,8 +291,7 @@ MoveCurrentWindowToLeftDesktop(follow)
 ;
 ; This function creates a new virtual desktop and switches to it
 ;
-createVirtualDesktop()
-{
+createVirtualDesktop() {
     global CurrentDesktop, DesktopCount
     Send, #^d
     DesktopCount++
@@ -299,8 +302,7 @@ createVirtualDesktop()
 ;
 ; This function deletes the current virtual desktop
 ;
-deleteVirtualDesktop()
-{
+deleteVirtualDesktop() {
     global CurrentDesktop, DesktopCount, LastOpenedDesktop
     Send, #^{F4}
     if (LastOpenedDesktop >= CurrentDesktop) {
