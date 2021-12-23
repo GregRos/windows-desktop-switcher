@@ -4,7 +4,7 @@
 SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory
 SendMode Input ; Recommended for new scripts due to its superior speed and reliability
 #Include desktop_switcher.ahk
-
+SetCapsLockState, AlwaysOff
 GetHotkeyMode() {
     if (!GetKeyState("CapsLock", "P")) {
         return ""
@@ -17,9 +17,8 @@ GetHotkeyMode() {
         return "C"
     }
 }
-    
-CapsLock Up::Return
-CapsLock::Return
+
+
 
 #if GetHotkeyMode() != ""
 RButton::Return
