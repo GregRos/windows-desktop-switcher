@@ -20,7 +20,6 @@ GetHotkeyMode() {
     
 CapsLock Up::Return
 CapsLock::Return
-Return
 
 #if GetHotkeyMode() != ""
 RButton::Return
