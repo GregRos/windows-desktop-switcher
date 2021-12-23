@@ -19,6 +19,7 @@ GetHotkeyMode() {
 }
 
 
+#MaxThreadsPerHotkey, 4
 
 #if GetHotkeyMode() != ""
 RButton::Return

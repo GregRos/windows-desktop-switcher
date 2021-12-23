@@ -1,0 +1,70 @@
+location: gitmans
+sources:
+  - repo: https://github.com/HotKeyIt/TT
+    name: _TT
+    rev: master
+    type: git
+    sparse_paths:
+      -
+    links:
+      -
+    scripts:
+      - del /f /q ..\..\Lib
+      - mkdir ..\..\Lib
+      - copy /y *.* ..\..\Lib\
+  - repo: https://github.com/GregRos/_Struct
+    name: _Struct
+    rev: master
+    type: git
+    sparse_paths:
+      -
+    links:
+      -
+    scripts:
+      - copy /y *.* ..\..\Lib\
+  - repo: https://github.com/GregRos/AhkUtility
+    name: AhkUtility
+    rev: master
+    type: git
+    sparse_paths:
+      -
+    links:
+      -
+    scripts:
+      - copy /y *.* ..\..\Lib\
+default_group: ''
+groups:
+  -
+sources_locked:
+  - repo: https://github.com/HotKeyIt/TT
+    name: _TT
+    rev: fedeca7f8a63915dab5abe8b87841680f38f1887
+    type: git
+    sparse_paths:
+      -
+    links:
+      -
+    scripts:
+      - del /f /q ..\..\Lib
+      - mkdir ..\..\Lib
+      - copy /y *.* ..\..\Lib\
+  - repo: https://github.com/GregRos/_Struct
+    name: _Struct
+    rev: a633bf3940da5805855ab5e414ad696d443455b6
+    type: git
+    sparse_paths:
+      -
+    links:
+      -
+    scripts:
+      - copy /y *.* ..\..\Lib\
+  - repo: https://github.com/GregRos/AhkUtility
+    name: AhkUtility
+    rev: be38b0e17d39750c6d3aafb0f04cce392e695e3f
+    type: git
+    sparse_paths:
+      -
+    links:
+      -
+    scripts:
+      - copy /y *.* ..\..\Lib\
