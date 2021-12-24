@@ -5,7 +5,7 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory
 SendMode Input ; Recommended for new scripts due to its superior speed and reliability
 #Include _implementation.ahk
 Menu, Tray, Icon, images\icon.ico
-Menu, Tray, Tip, gWindowsDesktopSwitcher+! v0.2.0
+Menu, Tray, Tip, WindowsDesktopSwitcher! v0.2.0
 SetCapsLockState, AlwaysOff
 GetHotkeyMode() {
     if (!GetKeyState("CapsLock", "P")) {

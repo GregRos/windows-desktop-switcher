@@ -21,6 +21,16 @@ sources:
       -
     scripts:
       - copy /y *.* ..\..\Lib\
+  - repo: https://github.com/GregRos/_Struct
+    name: _Struct
+    rev: master
+    type: git
+    sparse_paths:
+      -
+    links:
+      -
+    scripts:
+      - copy /y *.* ..\..\Lib\
 default_group: ''
 groups:
   -
@@ -38,7 +48,7 @@ sources_locked:
       - copy /y *.* ..\..\Lib\
   - repo: https://github.com/GregRos/ahk-gutils
     name: ahk-gutils
-    rev: 51334a863467722178a657896e48e78ad146a192
+    rev: 75a21299661e8ff077debabbb7da482cb35c5ba4
     type: git
     sparse_paths:
       -

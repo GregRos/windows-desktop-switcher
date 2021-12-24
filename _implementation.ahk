@@ -3,7 +3,13 @@
 DesktopCount := 2 ; Windows starts with 2 desktops at boot
 CurrentDesktop := 1 ; Desktop count is 1-indexed (Microsoft numbers them this way)
 LastOpenedDesktop := 1
+global _g_desktopIdToName := {}
 
+#include <TT>
+; Required definition for TT.ahk
+Struct(Structure,pointer:=0,init:=0){
+    return new _Struct(Structure,pointer,init)
+} 
 ; DLL
 hVirtualDesktopAccessor := DllCall("LoadLibrary", "Str", A_ScriptDir . "\VirtualDesktopAccessor.dll", "Ptr")
 global IsWindowOnDesktopNumberProc := DllCall("GetProcAddress", Ptr, hVirtualDesktopAccessor, AStr, "IsWindowOnDesktopNumber", "Ptr")
@@ -14,7 +20,6 @@ SetKeyDelay, 75
 mapDesktopsFromRegistry()
 OutputDebug, [loading] desktops: %DesktopCount% current: %CurrentDesktop%
 
-;
 ; This function examines the registry to build an accurate list of the current virtual desktops and which one we're currently on.
 ; List of desktops appears to be in HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VirtualDesktops
 ; On Windows 11 the current desktop UUID appears to be in the same location
@@ -23,7 +28,7 @@ OutputDebug, [loading] desktops: %DesktopCount% current: %CurrentDesktop%
 mapDesktopsFromRegistry()
 {
     global CurrentDesktop, DesktopCount
-
+    desktopIdToName := {}
     ; Get the current desktop UUID. Length should be 32 always, but there's no guarantee this couldn't change in a later Windows release so we check.
     IdLength := 32
     SessionId := getSessionId()
@@ -39,7 +44,8 @@ mapDesktopsFromRegistry()
     }
 
     ; Get a list of the UUIDs for all virtual desktops on the system
-    RegRead, DesktopList, HKEY_CURRENT_USER, SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VirtualDesktops, VirtualDesktopIDs
+    vdKey := "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VirtualDesktops"
+    RegRead, DesktopList, % vdKey, VirtualDesktopIDs
     if (DesktopList) {
         DesktopListLength := StrLen(DesktopList)
         ; Figure out how many virtual desktops there are
@@ -55,16 +61,44 @@ mapDesktopsFromRegistry()
         StartPos := (i * IdLength) + 1
         DesktopIter := SubStr(DesktopList, StartPos, IdLength)
         OutputDebug, The iterator is pointing at %DesktopIter% and count is %i%.
-
+        desktopIdToName[i + 1] := DesktopIter
         ; Break out if we find a match in the list. If we didn't find anything, keep the
         ; old guess and pray we're still correct :-D.
         if (DesktopIter = CurrentDesktopId) {
             CurrentDesktop := i + 1
             OutputDebug, Current desktop number is %CurrentDesktop% with an ID of %DesktopIter%.
-            break
         }
         i++
     }
+
+    for i, BinId in desktopIdToName {
+        LastBinIdPart := SubStr(BinId, -7)
+        hit := False
+        Loop, Reg, % vdKey "\Desktops", RV
+        {
+            if (A_LoopRegName != "Name") {
+                Continue
+            }
+            LastSubkeyPart := StrSplit(A_LoopRegSubkey, "\")
+            LastSubkeyPart := Trim(LastSubkeyPart[LastSubkeyPart.MaxIndex()], "{}")
+            LastRegIdPart := SubStr(LastSubkeyPart, -7)
+
+            if (LastBinIdPart = LastRegIdPart) {
+                RegRead, Name,% A_LoopRegKey "\" A_LoopRegSubkey, Name
+                if (!ErrorLevel) {
+                    desktopIdToName[i] := name
+                    hit := true
+                    break
+                }
+            }
+        }
+        if (!hit) {
+            desktopIdToName[i] := "Desktop " i
+        } 
+        name := desktopIdToName[i]
+        OutputDebug, %i% Desktop ID %BinId% called %name%
+    }
+    _g_desktopIdToName := desktopIdToName
 }
 
 ;
@@ -90,7 +124,7 @@ getSessionId() {
 _switchDesktopToTarget(targetDesktop) {
     ; Globals variables should have been updated via updateGlobalVariables() prior to entering this function
     global CurrentDesktop, DesktopCount, LastOpenedDesktop
-
+    prevDesktop := CurrentDesktop
     ; Don't attempt to switch to an invalid desktop
     if (targetDesktop > DesktopCount || targetDesktop < 1 || targetDesktop == CurrentDesktop) {
         OutputDebug, [invalid] target: %targetDesktop% current: %CurrentDesktop%
@@ -115,10 +149,11 @@ _switchDesktopToTarget(targetDesktop) {
         CurrentDesktop--
         OutputDebug, [left] target: %targetDesktop% current: %CurrentDesktop%
     }
-
     ; Makes the WinActivate fix less intrusive
     Sleep, 50
     focusTheForemostWindow(targetDesktop)
+    _notifyDesktopSwitched(prevDesktop, CurrentDesktop)
+
 }
 
 _getJetBrainsProjectName(hwnd) {
@@ -137,8 +172,8 @@ _getJetBrainsProjectName(hwnd) {
     if (!project) {
         Throw, % "Error - No Project Name IN " windowTitle
     }
-    regex = i).*( - \Q%project%\E|\Q%project%\E – ).*
-    return regex
+regex = i).*( - \Q%project%\E|\Q%project%\E – ).*
+return regex
 }
 
 _getSmartGitProjectName(hwnd) {
@@ -194,6 +229,23 @@ updateGlobalVariables() {
     ; Re-generate the list of desktops and where we fit in that. We do this because
     ; the user may have switched desktops via some other means than the script.
     mapDesktopsFromRegistry()
+}
+
+global _desktopTT := TT("Icon=1", "", "🔄 Desktop")
+_desktopTT.Font("S20 bold, Consolas")
+_d_hideTT() {
+    _desktopTT.Hide()
+    SetTimer, _d_hideTT, Off
+}
+
+_notifyDesktopSwitched(oldDesktop, newDesktop) {
+    Sleep 50
+    oldDesktopName := _g_desktopIdToName[oldDesktop]
+    newDesktopName := _g_desktopIdToName[newDesktop]
+    caption = %newDesktopName%
+    _desktopTT.Text(caption)
+    _desktopTT.Show()
+    SetTimer, _d_hideTT, 750
 }
 
 switchDesktopByNumber(targetDesktop) {
