@@ -11,16 +11,6 @@ sources:
     scripts:
       - del /f /q ..\..\Lib
       - copy /y *.* ..\..\Lib\
-  - repo: https://github.com/GregRos/_Struct
-    name: _Struct
-    rev: master
-    type: git
-    sparse_paths:
-      -
-    links:
-      -
-    scripts:
-      - copy /y *.* ..\..\Lib\
   - repo: https://github.com/GregRos/ahk-gutils
     name: ahk-gutils
     rev: master
@@ -45,16 +35,6 @@ sources_locked:
       -
     scripts:
       - del /f /q ..\..\Lib
-      - copy /y *.* ..\..\Lib\
-  - repo: https://github.com/GregRos/_Struct
-    name: _Struct
-    rev: a633bf3940da5805855ab5e414ad696d443455b6
-    type: git
-    sparse_paths:
-      -
-    links:
-      -
-    scripts:
       - copy /y *.* ..\..\Lib\
   - repo: https://github.com/GregRos/ahk-gutils
     name: ahk-gutils
