@@ -170,7 +170,7 @@ _getJetBrainsProjectName(hwnd) {
         project := results[2]
     }
     if (!project) {
-        Throw, % "Error - No Project Name IN " windowTitle
+        return "ahk_id " hwnd
     }
 regex = i).*( - \Q%project%\E|\Q%project%\E – ).*
 return regex

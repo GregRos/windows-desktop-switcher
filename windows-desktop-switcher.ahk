@@ -1,12 +1,24 @@
 ﻿#SingleInstance Force ; The script will Reload if launched while already running
 #NoEnv ; Recommended for performance and compatibility with future AutoHotkey releases
-#KeyHistory 0 ; Ensures user privacy when debugging is not needed
 SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory
 SendMode Input ; Recommended for new scripts due to its superior speed and reliability
-#Include _implementation.ahk
-Menu, Tray, Icon, images\icon.ico
-Menu, Tray, Tip, WindowsDesktopSwitcher! v0.2.0
 SetCapsLockState, AlwaysOff
+
+#Include _implementation.ahk
+Menu, tray, NoStandard
+Menu, Tray, Icon, images\icon.ico
+Menu, Tray, Tip, DesktopSwitcher! v0.2.0
+Menu, Tray, Add, DesktopSwitcher Help, OnHelp
+Menu, Tray, Default, DesktopSwitcher Help
+Menu, Tray, Add, Exit, OnExit
+
+OnExit() {
+    ExitApp
+}
+OnHelp() {
+    Run, % A_ScriptDir "\HELP.html"
+}
+
 GetHotkeyMode() {
     if (!GetKeyState("CapsLock", "P")) {
         return ""
