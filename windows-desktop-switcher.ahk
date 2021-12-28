@@ -20,6 +20,10 @@ OnHelp() {
 }
 
 GetHotkeyMode() {
+    SysGet, CurrnetPrimaryMonitor, MonitorPrimary
+    if (CurrnetPrimaryMonitor != 1) {
+        return ""
+    }
     if (!GetKeyState("CapsLock", "P")) {
         return ""
     }
