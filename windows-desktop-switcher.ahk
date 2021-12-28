@@ -7,7 +7,7 @@ SetCapsLockState, AlwaysOff
 #Include _implementation.ahk
 Menu, tray, NoStandard
 Menu, Tray, Icon, images\icon.ico
-Menu, Tray, Tip, DesktopSwitcher! v0.2.0
+Menu, Tray, Tip, DesktopSwitcher!
 Menu, Tray, Add, DesktopSwitcher Help, OnHelp
 Menu, Tray, Default, DesktopSwitcher Help
 Menu, Tray, Add, Exit, OnExit
@@ -31,8 +31,6 @@ GetHotkeyMode() {
         return "C"
     }
 }
-
-
 #MaxThreadsPerHotkey, 4
 
 #if GetHotkeyMode() != ""
