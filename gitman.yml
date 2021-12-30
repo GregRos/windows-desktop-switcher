@@ -48,7 +48,7 @@ sources_locked:
       - copy /y *.* ..\..\Lib\
   - repo: https://github.com/GregRos/ahk-gutils
     name: ahk-gutils
-    rev: 75a21299661e8ff077debabbb7da482cb35c5ba4
+    rev: 2a8a58da54e1b4b2f0a898d6db5310943b393675
     type: git
     sparse_paths:
       -
