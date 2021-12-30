@@ -3,6 +3,7 @@
 SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory
 SendMode Input ; Recommended for new scripts due to its superior speed and reliability
 SetCapsLockState, AlwaysOff
+#MaxThreadsPerHotkey, 4
 
 #Include _implementation.ahk
 Menu, tray, NoStandard
@@ -12,6 +13,13 @@ Menu, Tray, Add, DesktopSwitcher Help, OnHelp
 Menu, Tray, Default, DesktopSwitcher Help
 Menu, Tray, Add, Exit, OnExit
 
+ComObjArrayToString(arr) {
+    res := ""
+    for x in arr {
+        res .= chr(x)
+    }
+    return res
+}
 OnExit() {
     ExitApp
 }
@@ -20,10 +28,6 @@ OnHelp() {
 }
 
 GetHotkeyMode() {
-    SysGet, CurrnetPrimaryMonitor, MonitorPrimary
-    if (CurrnetPrimaryMonitor != 1) {
-        return ""
-    }
     if (!GetKeyState("CapsLock", "P")) {
         return ""
     }
@@ -35,13 +39,12 @@ GetHotkeyMode() {
         return "C"
     }
 }
-#MaxThreadsPerHotkey, 4
 
 #if GetHotkeyMode() != ""
-RButton::Return
+    RButton::Return
 LButton::Return
-#if
-    #if GetHotkeyMode() = "C"
+
+#if GetHotkeyMode() = "C"
     1::switchDesktopByNumber(1)
 2::switchDesktopByNumber(2)
 3::switchDesktopByNumber(3)
@@ -50,8 +53,7 @@ LButton::Return
 d::switchDesktopToRight()
 a::switchDesktopToLeft()
 tab::switchDesktopToLastOpened()
-#if
-    #if GetHotkeyMode() = "CL"
+#if GetHotkeyMode() = "CL"
     d::MoveCurrentWindowToRightDesktop(True)
 a::MoveCurrentWindowToLeftDesktop(True)
 1::MoveCurrentWindowToDesktop(1, True)
@@ -59,8 +61,7 @@ a::MoveCurrentWindowToLeftDesktop(True)
 3::MoveCurrentWindowToDesktop(3, True)
 4::MoveCurrentWindowToDesktop(4, True)
 5::MoveCurrentWindowToDesktop(5, True)
-#if
-    #if GetHotkeyMode() = "CR"
+#if GetHotkeyMode() = "CR"
     d::MoveCurrentWindowToRightDesktop(False)
 a::MoveCurrentWindowToLeftDesktop(False)
 1::MoveCurrentWindowToDesktop(1, False)
