@@ -6,6 +6,7 @@ SetCapsLockState, AlwaysOff
 #MaxThreadsPerHotkey, 4
 
 #Include _implementation.ahk
+#include <gutils>
 Menu, tray, NoStandard
 Menu, Tray, Icon, images\icon.ico
 Menu, Tray, Tip, DesktopSwitcher!

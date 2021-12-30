@@ -231,9 +231,9 @@ updateGlobalVariables() {
     mapDesktopsFromRegistry()
 }
 
-global _desktopTT := TT("", "", "")
+global _desktopTT := TT("ClickTrough", "", "")
 _desktopTT.SETWINDOWTHEME("")
-_desktopTT.Font("S24 bold, Segoe UI")
+_desktopTT.Font("S24 bold, Consolas")
 _desktopTT.Color("White", "Red")
 _desktopTT.SETMARGIN(30, 30, 30, 30)
 _d_hideTT() {
@@ -246,8 +246,14 @@ _notifyDesktopSwitched(oldDesktop, newDesktop) {
     oldDesktopName := _g_desktopIdToName[oldDesktop]
     newDesktopName := _g_desktopIdToName[newDesktop]
     caption = %newDesktopName%
+    if (gStr_Len(caption) < 8) {
+        dif := 8 - gStr_Len(caption)
+        left := dif // 2
+        right := dif - left
+        caption := gStr_Repeat(" ", left) caption gStr_Repeat(" ", right)
+    }
     _desktopTT.Text(caption)
-    _desktopTT.Show("", A_ScreenWidth, A_ScreenHeight)
+    _desktopTT.Show("", A_ScreenWidth - 200, A_ScreenHeight - 200)
     SetTimer, _d_hideTT, 2000
 }
 
