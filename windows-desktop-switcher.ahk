@@ -12,7 +12,7 @@ Menu, Tray, Icon, images\icon.ico
 Menu, Tray, Tip, DesktopSwitcher!
 Menu, Tray, Add, DesktopSwitcher Help, OnHelp
 Menu, Tray, Default, DesktopSwitcher Help
-Menu, Tray, Add, Exit, OnExit
+Menu, Tray, Add, Exit, OnClickExit
 
 ComObjArrayToString(arr) {
     res := ""
@@ -21,7 +21,7 @@ ComObjArrayToString(arr) {
     }
     return res
 }
-OnExit() {
+OnClickExit() {
     ExitApp
 }
 OnHelp() {
